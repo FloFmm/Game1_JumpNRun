@@ -2,10 +2,11 @@ import pygame
 from random import randint
 
 pygame.init()
-blockAmount = 12
+blockAmount = 10
 windowWidth = 1200
 windowHeight = 600
 gravity = 1
+gameMovementSpeed = 2
 
 
 window = pygame.display.set_mode((windowWidth, windowHeight))
@@ -26,6 +27,8 @@ class Player:
         self.jumpSpeed = jumpSpeed
         self.curSpeedX = 0
         self.curSpeedY = 0
+        self.maxJumps = 2
+        self.jumpMark = self.maxJumps
         # self.inJump = False
         self.displayPlayer()
 
@@ -53,7 +56,7 @@ class Player:
             #   self.playerXC -= xStep
             #   self.curSpeedX = 0
             #   break
-            if not ground.groundCollisionX():
+            if ground.groundCollisionX() == 0:
                 self.playerXC += xStep
             else:
                 self.playerXC -= xStep
@@ -64,14 +67,23 @@ class Player:
             #    self.playerYC += 2
             #    self.curSpeedY = 0
             #    break
-            if not ground.groundCollisionY():
+            collidedBlock = ground.groundCollisionY()
+            if collidedBlock == 0:
                 self.playerYC += yStep
             else:
+                self.jumpMark = self.maxJumps
                 self.playerYC -= 1
                 break
 
         if toUnsigned(oldXpos - self.playerXC) == 1: self.playerXC = oldXpos
         if oldYpos - self.playerYC == -1: self.playerYC = oldYpos # 1 Pixel upwards works, 1 Pixel downwards doesn´t
+
+    def jump(self):
+
+        if self.jumpMark > 0:
+            self.jumpMark -= 1
+            Player1.curSpeedY = -Player1.jumpSpeed
+
 
     def outOfScreenX(self):
         if self.playerXC < 0 or self.playerXC + self.playerWidth >= windowWidth:
@@ -98,16 +110,27 @@ class GroundBlock:
         self.blockWidth = blockWidth
         self.blockHeight = blockHeight
         self.blockX = blockX
-        self.blockRect = pygame.Rect((self.blockX, windowHeight-self.blockHeight, self.blockWidth, self.blockHeight))
+        self.blockY = windowHeight - self.blockHeight
+        self.blockRect = pygame.Rect((self.blockX, self.blockY, self.blockWidth, self.blockHeight))
 
 
     def drawBlock(self):
+        if self.blockX + self.blockWidth <= 0:
+            self.blockX = windowWidth
+            self.blockHeight = randint(ground.groundMin, ground.groundMax)
+            self.blockY = windowHeight-self.blockHeight
+
+        self.blockRect = pygame.Rect((self.blockX, self.blockY, self.blockWidth, self.blockHeight))
         pygame.draw.rect(window, (255, 255, 255), self.blockRect)
+
+
 
 
 class Ground:
 
-    def __init__(self, blockAmount):
+    def __init__(self, blockAmount, groundMin, groundMax):
+        self.groundMin = groundMin
+        self.groundMax = groundMax
         self.blockWidth = windowWidth / blockAmount
         self.groundArray = []
         self.blockHeight = 20
@@ -116,7 +139,7 @@ class Ground:
 
     def initGroundArray(self):
         for i in range(self.blockAmount+1):
-            self.groundArray.append(GroundBlock(self.blockWidth, randint(5,200), self.blockWidth*i))
+            self.groundArray.append(GroundBlock(self.blockWidth, randint(self.groundMin, self.groundMax), self.blockWidth*i))
 
     def groundCollisionY(self):
         for i in range(self.blockAmount+1):
@@ -124,8 +147,8 @@ class Ground:
                 if Collision("y", i):
                     Player1.curSpeedY = 0
                     # Player1.playerYC = windowHeight-self.groundArray[i].blockHeight-Player1.playerHeight
-                    return True
-        return False
+                    return i + 1
+        return 0
 
     def groundCollisionX(self):
         for i in range(self.blockAmount+1):
@@ -133,8 +156,14 @@ class Ground:
                 if Collision("x", i):
                     Player1.curSpeedX = 0
                     # Player1.playerYC = windowHeight-self.groundArray[i].blockHeight-Player1.playerHeight
-                    return 1
+                    return i + 1
         return 0
+
+    def shiftWorld(self):
+        for i in range(blockAmount+1):
+            self.groundArray[i].blockX -= gameMovementSpeed
+
+        Player1.playerXC -= gameMovementSpeed
 
 
 def Collision(mode, i):
@@ -146,6 +175,8 @@ def Collision(mode, i):
         return Player1.playerXC + Player1.playerWidth > ground.groundArray[i].blockX and Player1.playerXC < ground.groundArray[i].blockX + ground.groundArray[i].blockWidth
 
 
+def overlappedRect(x1, y1, width1, height1, x2, y2, width2, height2):
+    return x1 + width1 > x2 and x1 < x2 + width2 and y1 + height1 > y2 and y1 < y2 + height2
 
 
 def toUnsigned(x):
@@ -153,11 +184,12 @@ def toUnsigned(x):
         return -x
     return x
 
-ground = Ground(blockAmount)
+ground = Ground(blockAmount, 5, 200)
 
 Player1 = Player(80, 40, 200, 200, 5, 15)
 # Player2 = Player(40, 80, 400, 400, 5)
 
+pygame.key.set_repeat(50, 50)
 
 
 while True:
@@ -176,13 +208,21 @@ while True:
     else:
         Player1.curSpeedX = 0
     if keysPressed[pygame.K_SPACE]:
-        Player1.curSpeedY = -Player1.jumpSpeed
+        if spaceHold == 0:
+            spaceHold = 1
+            if Player1.jumpMark != 0:
+                print(Player1.jumpMark)
+            Player1.jump()
+    else:
+        spaceHold = 0
+
         #Player1.playerYC -= 1
 
     Player1.gravity()
 
     Player1.move()
 
+    ground.shiftWorld()
 
     for i in range(blockAmount+1):
         ground.groundArray[i].drawBlock()
