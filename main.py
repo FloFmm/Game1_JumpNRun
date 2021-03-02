@@ -31,7 +31,7 @@ class Player:
 
     def displayPlayer(self):
         self.playerRect = pygame.Rect((self.playerXC, self.playerYC, self.playerWidth, self.playerHeight))
-        pygame.draw.rect(window, (255, 255, 255), self.playerRect)
+        pygame.draw.rect(window, (255, 0, 0), self.playerRect)
 
     def move(self):
 
@@ -49,21 +49,39 @@ class Player:
             yStep = -1
 
         for i in range(toUnsigned(self.curSpeedX)):
-            if (ground.groundCollisionX() == 0):
+            #if self.outOfScreenX():
+            #   self.playerXC -= xStep
+            #   self.curSpeedX = 0
+            #   break
+            if not ground.groundCollisionX():
                 self.playerXC += xStep
             else:
                 self.playerXC -= xStep
                 break
 
         for i in range(toUnsigned(self.curSpeedY)):
-            if (ground.groundCollisionY() == 0):
+            #if self.outOfScreenY():
+            #    self.playerYC += 2
+            #    self.curSpeedY = 0
+            #    break
+            if not ground.groundCollisionY():
                 self.playerYC += yStep
             else:
                 self.playerYC -= 1
                 break
 
         if toUnsigned(oldXpos - self.playerXC) == 1: self.playerXC = oldXpos
-        if toUnsigned(oldYpos - self.playerYC) == 1: self.playerYC = oldYpos
+        if oldYpos - self.playerYC == -1: self.playerYC = oldYpos # 1 Pixel upwards works, 1 Pixel downwards doesn´t
+
+    def outOfScreenX(self):
+        if self.playerXC < 0 or self.playerXC + self.playerWidth >= windowWidth:
+            return True
+        return False
+
+    def outOfScreenY(self):
+        if self.playerYC < 0 or self.playerYC + self.playerHeight >= windowHeight:
+            return True
+        return False
 
 
     def gravity(self):
@@ -106,8 +124,8 @@ class Ground:
                 if Collision("y", i):
                     Player1.curSpeedY = 0
                     # Player1.playerYC = windowHeight-self.groundArray[i].blockHeight-Player1.playerHeight
-                    return 1
-        return 0
+                    return True
+        return False
 
     def groundCollisionX(self):
         for i in range(self.blockAmount+1):
@@ -147,7 +165,7 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: pygame.quit()
 
-    Player1.displayPlayer()
+
 
     keysPressed = pygame.key.get_pressed()
 
@@ -159,7 +177,7 @@ while True:
         Player1.curSpeedX = 0
     if keysPressed[pygame.K_SPACE]:
         Player1.curSpeedY = -Player1.jumpSpeed
-        Player1.playerYC -= 5
+        #Player1.playerYC -= 1
 
     Player1.gravity()
 
@@ -169,8 +187,7 @@ while True:
     for i in range(blockAmount+1):
         ground.groundArray[i].drawBlock()
 
-
-
+    Player1.displayPlayer()
 
     pygame.display.flip()
     window.fill((0, 0, 0))
