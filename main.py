@@ -3,8 +3,8 @@ from random import randint
 
 pygame.init()
 blockAmount = 14
-windowWidth = 1600
-windowHeight = 900
+windowWidth = 1200
+windowHeight = 600
 gravity = 1
 gameMovementSpeed = 2
 worldScale = 10
@@ -34,8 +34,8 @@ class Player:
         self.displayPlayer()
 
     def updateScale(self):
-        self.playerHeight = windowHeight/worldScale
-        self.playerWidth = windowWidth/(worldScale*4)
+        self.playerHeight = int(windowHeight/worldScale)
+        self.playerWidth = int(windowWidth/(worldScale*4))
 
     def displayPlayer(self):
         self.playerRect = pygame.Rect((self.playerXC, self.playerYC, self.playerWidth, self.playerHeight))
@@ -72,12 +72,15 @@ class Player:
             #    self.playerYC += 2
             #    self.curSpeedY = 0
             #    break
-            collidedBlock = ground.groundCollisionY()
-            if collidedBlock == 0:
+            if ground.groundCollisionY() == 0:
                 self.playerYC += yStep
             else:
                 self.jumpMark = self.maxJumps
+                val = ground.groundCollisionY() - 1
+                #print(f"{Player1.playerYC} + {Player1.playerHeight} - {ground.groundArray[ground.groundCollisionY()-1].blockY} = {Player1.playerHeight + Player1.playerYC - ground.groundArray[ground.groundCollisionY()-1].blockY}")
                 self.playerYC -= 1
+                print(
+                    f"{Player1.playerYC} + {Player1.playerHeight} - {ground.groundArray[val].blockY} = {Player1.playerHeight + Player1.playerYC - ground.groundArray[val].blockY}")
                 break
 
         if toUnsigned(oldXpos - self.playerXC) == 1: self.playerXC = oldXpos
@@ -114,7 +117,7 @@ class GroundBlock:
     def __init__(self, blockWidth, rawBlockHeight, blockX):
         self.blockWidth = blockWidth
         self.rawBlockHeight = rawBlockHeight
-        self.blockHeight = rawBlockHeight * windowHeight / 1000
+        self.blockHeight = int(rawBlockHeight * windowHeight / 1000)
         self.blockX = blockX
         self.blockY = windowHeight - self.blockHeight
         self.blockRect = pygame.Rect((self.blockX, self.blockY, self.blockWidth, self.blockHeight))
@@ -132,7 +135,7 @@ class Ground:
     def __init__(self, blockAmount, groundMin, groundMax):
         self.groundMin = groundMin
         self.groundMax = groundMax
-        self.blockWidth = windowWidth / blockAmount
+        self.blockWidth = int(windowWidth / blockAmount)
         self.groundArray = []
         self.blockHeight = 20
         self.blockAmount = blockAmount
@@ -146,20 +149,21 @@ class Ground:
     def updateWorld(self):
         self.distanceMoved += gameMovementSpeed
         for j in range(self.blockAmount + 1):
-            self.groundArray[j].blockWidth = windowWidth / blockAmount
+            self.groundArray[j].blockWidth = int(windowWidth / blockAmount)
             self.groundArray[j].blockX = windowWidth - (
                         (windowWidth - j * self.groundArray[j].blockWidth + self.distanceMoved) % (
-                            windowWidth + self.groundArray[j].blockWidth))
-            self.distanceMoved = self.distanceMoved % (windowWidth+ self.groundArray[j].blockWidth)
+                        windowWidth + self.groundArray[j].blockWidth))
+            self.distanceMoved = self.distanceMoved % ( windowWidth + self.groundArray[j].blockWidth)
 
-            if self.groundArray[j].blockX >= windowWidth:
+            if self.groundArray[j].blockX >= windowWidth-1:
                 self.groundArray[j].rawBlockHeight = randint(ground.groundMin, ground.groundMax)
-            self.groundArray[j].blockHeight = self.groundArray[j].rawBlockHeight * windowHeight / 1000
+            self.groundArray[j].blockHeight = int(self.groundArray[j].rawBlockHeight * windowHeight / 1000)
             self.groundArray[j].blockY = 1 + windowHeight - self.groundArray[j].blockHeight
 
             self.groundArray[j].blockRect = pygame.Rect((self.groundArray[j].blockX, self.groundArray[j].blockY,
                                                         self.groundArray[j].blockWidth,
                                                         self.groundArray[j].blockHeight))
+        self.groundArray[blockAmount].blockWidth += windowWidth - blockAmount * self.groundArray[blockAmount].blockWidth
             #self.groundArray[j].rawBlockHeight = randint(ground.groundMin, ground.groundMax)
 
           #  self.groundArray[j].blockX = i * self.groundArray[j].blockWidth
@@ -192,9 +196,9 @@ class Ground:
 
 def Collision(mode, i):
     if mode == "b" or mode == "B":
-        return Player1.playerYC + Player1.playerHeight > windowHeight - ground.groundArray[i].blockHeight and Player1.playerYC < windowHeight and Player1.playerXC + Player1.playerWidth > ground.groundArray[i].blockX and Player1.playerXC < ground.groundArray[i].blockX + ground.groundArray[i].blockWidth
+        return Player1.playerYC + Player1.playerHeight -1 > windowHeight - ground.groundArray[i].blockHeight and Player1.playerYC < windowHeight and Player1.playerXC + Player1.playerWidth > ground.groundArray[i].blockX and Player1.playerXC < ground.groundArray[i].blockX + ground.groundArray[i].blockWidth
     if mode == "x" or mode == "X":
-        return Player1.playerYC + Player1.playerHeight > windowHeight - ground.groundArray[i].blockHeight and Player1.playerYC < windowHeight
+        return Player1.playerYC + Player1.playerHeight -1 > windowHeight - ground.groundArray[i].blockHeight and Player1.playerYC < windowHeight
     if mode == "y" or mode == "Y":
         return Player1.playerXC + Player1.playerWidth > ground.groundArray[i].blockX and Player1.playerXC < ground.groundArray[i].blockX + ground.groundArray[i].blockWidth
 
@@ -243,6 +247,8 @@ while True:
 
         #Player1.playerYC -= 1
 
+
+    #print(ground.groundArray[5].blockHeight)
 
 
     #update all sizes
