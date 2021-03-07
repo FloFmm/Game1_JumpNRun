@@ -36,16 +36,15 @@ class Player:
     def updateScale(self):
         self.playerHeight = int(windowHeight/worldScale)
         self.playerWidth = int(windowWidth/(worldScale*4))
+        self.jumpSpeed = int(windowHeight/45)
 
     def displayPlayer(self):
         self.playerRect = pygame.Rect((self.playerXC, self.playerYC, self.playerWidth, self.playerHeight))
         pygame.draw.rect(window, (255, 0, 0), self.playerRect)
 
     def move(self):
-
-        oldYpos = self.playerYC
-        oldXpos = self.playerXC
-
+        xStep = 0
+        yStep = 0
         if self.curSpeedX > 0:
             xStep = 1
         elif self.curSpeedX < 0:
@@ -56,35 +55,31 @@ class Player:
         elif self.curSpeedY < 0:
             yStep = -1
 
+        leave = False
         for i in range(toUnsigned(self.curSpeedX)):
-            #if self.outOfScreenX():
-            #   self.playerXC -= xStep
-            #   self.curSpeedX = 0
-            #   break
-            if ground.groundCollisionX() == 0:
-                self.playerXC += xStep
-            else:
-                self.playerXC -= xStep
+            self.playerXC += xStep
+            collidedBlocks = ground.groundCollision()
+            for j in range(len(collidedBlocks)):
+                if ground.overlappedX(collidedBlocks[j] - 1) < ground.overlappedY(collidedBlocks[j] - 1):
+                    self.playerXC -= xStep * ground.overlappedX(collidedBlocks[j] - 1)
+                    Player1.curSpeedX = 0
+                    leave = True
+            if leave:
                 break
 
+
+        leave = False
         for i in range(toUnsigned(self.curSpeedY)):
-            #if self.outOfScreenY():
-            #    self.playerYC += 2
-            #    self.curSpeedY = 0
-            #    break
-            if ground.groundCollisionY() == 0:
-                self.playerYC += yStep
-            else:
-                self.jumpMark = self.maxJumps
-                val = ground.groundCollisionY() - 1
-                #print(f"{Player1.playerYC} + {Player1.playerHeight} - {ground.groundArray[ground.groundCollisionY()-1].blockY} = {Player1.playerHeight + Player1.playerYC - ground.groundArray[ground.groundCollisionY()-1].blockY}")
-                self.playerYC -= 1
-                print(
-                    f"{Player1.playerYC} + {Player1.playerHeight} - {ground.groundArray[val].blockY} = {Player1.playerHeight + Player1.playerYC - ground.groundArray[val].blockY}")
+            self.playerYC += yStep
+            collidedBlocks = ground.groundCollision()
+            for j in range(len(collidedBlocks)):
+                if ground.overlappedX(collidedBlocks[j] - 1) > ground.overlappedY(collidedBlocks[j] - 1):
+                    self.playerYC -= yStep * (ground.overlappedY(collidedBlocks[j] - 1))
+                    Player1.curSpeedY = 0
+                    self.jumpMark = self.maxJumps
+                    leave = True
+            if leave:
                 break
-
-        if toUnsigned(oldXpos - self.playerXC) == 1: self.playerXC = oldXpos
-        if oldYpos - self.playerYC == -1: self.playerYC = oldYpos # 1 Pixel upwards works, 1 Pixel downwards doesn´t
 
     def jump(self):
 
@@ -174,33 +169,65 @@ class Ground:
 
 
     def groundCollisionY(self):
+        arr =[]
         for i in range(self.blockAmount+1):
             if Collision("b", i):
                 if Collision("y", i):
                     Player1.curSpeedY = 0
                     # Player1.playerYC = windowHeight-self.groundArray[i].blockHeight-Player1.playerHeight
-                    return i + 1
-        return 0
+                    arr.append(i+1)
+        return arr
 
     def groundCollisionX(self):
+        arr = []
         for i in range(self.blockAmount+1):
             if Collision("b", i):
                 if Collision("x", i):
                     Player1.curSpeedX = 0
                     # Player1.playerYC = windowHeight-self.groundArray[i].blockHeight-Player1.playerHeight
-                    return i + 1
-        return 0
+                    arr.append(i+1)
+        return arr
 
+    def groundCollision(self):
+        arr = []
+        for i in range(self.blockAmount + 1):
+            if Collision("b", i):
+                arr.append(i + 1)
+        return arr
+
+
+    def overlappedX(self, block):
+        rightFromPlayer = Player1.playerXC + Player1.playerWidth - self.groundArray[block].blockX
+        leftFromPlayer = self.groundArray[block].blockX + self.groundArray[block].blockWidth - Player1.playerXC
+        if rightFromPlayer < leftFromPlayer:
+            return rightFromPlayer
+        else:
+            return leftFromPlayer
+
+    def overlappedY(self, block):
+        belowPlayer = Player1.playerYC + Player1.playerHeight - self.groundArray[block].blockY
+        abovePlayer = self.groundArray[block].blockY + self.groundArray[block].blockHeight - Player1.playerYC
+        if belowPlayer < abovePlayer:
+            return belowPlayer
+        else:
+            return abovePlayer
 
 
 
 def Collision(mode, i):
     if mode == "b" or mode == "B":
-        return Player1.playerYC + Player1.playerHeight -1 > windowHeight - ground.groundArray[i].blockHeight and Player1.playerYC < windowHeight and Player1.playerXC + Player1.playerWidth > ground.groundArray[i].blockX and Player1.playerXC < ground.groundArray[i].blockX + ground.groundArray[i].blockWidth
+        return Player1.playerYC + Player1.playerHeight - 1 > windowHeight - ground.groundArray[i].blockHeight\
+            and Player1.playerYC < windowHeight\
+            and Player1.playerXC + Player1.playerWidth > ground.groundArray[i].blockX\
+            and Player1.playerXC < ground.groundArray[i].blockX + ground.groundArray[i].blockWidth
     if mode == "x" or mode == "X":
-        return Player1.playerYC + Player1.playerHeight -1 > windowHeight - ground.groundArray[i].blockHeight and Player1.playerYC < windowHeight
+        return Player1.playerYC + Player1.playerHeight - 1 > windowHeight - ground.groundArray[i].blockHeight\
+            and Player1.playerYC < windowHeight
     if mode == "y" or mode == "Y":
-        return Player1.playerXC + Player1.playerWidth > ground.groundArray[i].blockX and Player1.playerXC < ground.groundArray[i].blockX + ground.groundArray[i].blockWidth
+        return Player1.playerXC + Player1.playerWidth > ground.groundArray[i].blockX \
+            and Player1.playerXC < ground.groundArray[i].blockX + ground.groundArray[i].blockWidth
+
+
 
 
 def overlappedRect(x1, y1, width1, height1, x2, y2, width2, height2):
@@ -239,8 +266,6 @@ while True:
     if keysPressed[pygame.K_SPACE]:
         if spaceHold == 0:
             spaceHold = 1
-            if Player1.jumpMark != 0:
-                print(Player1.jumpMark)
             Player1.jump()
     else:
         spaceHold = 0
