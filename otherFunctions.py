@@ -17,3 +17,11 @@ def toUnsigned(x):
     if x < 0:
         return -x
     return x
+
+
+def rest(x):
+    if x > 0:
+        return x % 1
+    elif x < 0:
+        return -((-x) % 1)
+    return 0

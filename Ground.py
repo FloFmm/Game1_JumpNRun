@@ -3,6 +3,7 @@ from otherFunctions import Collision
 
 import pygame
 from random import randint
+from otherFunctions import rest
 
 
 class Ground:
@@ -16,6 +17,7 @@ class Ground:
         self.blockAmount = world.blockAmount
         self.initGroundArray(world)
         self.distanceMoved = 0
+        self.restGS = 0
 
     # fills the ground array with blocks
     def initGroundArray(self, world):
@@ -24,8 +26,12 @@ class Ground:
 
     # shifts ground considering the current world.window size
     def updateGround(self, world):
+        # managing float integer value of current MS in one pixel steps
+        self.restGS = rest(self.restGS)
+        self.restGS += rest(world.gameMS)
+        world.gameMS += float(int(self.restGS))
 
-        self.distanceMoved = (self.distanceMoved + world.gameMS) % (world.windowWidth + self.groundArray[0].width)
+        self.distanceMoved = (self.distanceMoved + int(world.gameMS)) % (world.windowWidth + self.groundArray[0].width)
         if world.windowWidth != world.windowWidthOld:
             self.distanceMoved = int(self.distanceMoved * world.windowWidth/world.windowWidthOld)
 
@@ -38,7 +44,8 @@ class Ground:
 
             # update height of block if it went out of bound and got relocated
             if self.groundArray[j].XC >= world.windowWidth:  # +1 removed ###############################################
-                self.groundArray[j].rawHeight = randint(self.groundMin, self.groundMax)
+                self.groundArray[j] = GroundBlock(world, self.groundArray[j].XC,
+                                                  self.groundArray[j].width, randint(self.groundMin, self.groundMax))
 
             # vertical update
             self.groundArray[j].height = int(self.groundArray[j].rawHeight * world.windowHeight / 1000)

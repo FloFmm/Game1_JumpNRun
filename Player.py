@@ -1,5 +1,5 @@
 import pygame
-from otherFunctions import toUnsigned
+from otherFunctions import *
 
 
 class Player:
@@ -16,6 +16,8 @@ class Player:
         self.maxJumps = 2
         self.jumpMark = self.maxJumps
         self.playerRect = pygame.Rect((self.XC, self.YC, self.width, self.height))
+        self.restXS = 0
+        self.restYS = 0
 
     def updateScale(self, world):
 
@@ -30,7 +32,7 @@ class Player:
         self.height = int(world.windowHeight / world.playerSize)
         self.width = int(world.windowWidth / (world.playerSize * 4))
         self.jumpSpeed = int(world.windowHeight / 45)
-        self.MS = int(world.windowWidth / 240)
+        self.MS = world.windowWidth / 240
 
     def display(self, world):
         self.playerRect = pygame.Rect((self.XC, self.YC, self.width, self.height))
@@ -39,11 +41,12 @@ class Player:
     def move(self, world, ground):
 
         # shifting player with world
-        self.XC -= world.gameMS
+        self.XC -= int(world.gameMS)
 
         xStep = 0
         yStep = 0
 
+        # setting x and y step according to direction of movement
         if self.curSpeedX > 0:
             xStep = 1
         elif self.curSpeedX < 0:
@@ -54,8 +57,19 @@ class Player:
         elif self.curSpeedY < 0:
             yStep = -1
 
+
+
+        # managing float integer value of current MS in one pixel steps
+        self.restXS = rest(self.restXS)
+        self.restXS += rest(self.curSpeedX)
+        self.curSpeedX += float(int(self.restXS))
+
+        self.restYS = rest(self.restYS)
+        self.restYS += rest(self.curSpeedY)
+        self.curSpeedY += float(int(self.restYS))
+
         leave = False
-        for i in range(toUnsigned(self.curSpeedX)):
+        for i in range(int(toUnsigned(self.curSpeedX))):
             self.XC += xStep
             collidedBlocks = ground.groundCollision(world, self)
             for j in range(len(collidedBlocks)):
@@ -66,8 +80,9 @@ class Player:
             if leave:
                 break
 
+
         leave = False
-        for i in range(toUnsigned(self.curSpeedY)):
+        for i in range(int(toUnsigned(self.curSpeedY))):
             self.YC += yStep
             collidedBlocks = ground.groundCollision(world, self)
             for j in range(len(collidedBlocks)):
