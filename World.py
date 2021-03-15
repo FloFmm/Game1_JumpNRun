@@ -9,8 +9,8 @@ class World:
         self.windowHeight = 600
         self.windowWidthOld = self.windowWidth
         self.windowHeightOld = self.windowHeight
+        self.gameMS = 0  # self.windowWidth / 600
         self.gravity = self.windowHeight / 600
-        self.gameMS = self.windowWidth / 600
         self.playerSize = 10
         self.spaceHold = False
         self.window = pygame.display.set_mode((self.windowWidth, self.windowHeight), pygame.RESIZABLE)
@@ -19,5 +19,5 @@ class World:
         self.windowWidthOld = self.windowWidth
         self.windowHeightOld = self.windowHeight
         self.windowWidth, self.windowHeight = pygame.display.get_surface().get_size()
-        self.gameMS = self.windowWidth / 600
+        self.gameMS = 0  # self.windowWidth / 600
         self.gravity = self.windowHeight / 600

@@ -22,7 +22,11 @@ class Ground:
     # fills the ground array with blocks
     def initGroundArray(self, world):
         for i in range(self.blockAmount+1):
-            self.groundArray.append(GroundBlock(world, self.width*i, self.width, randint(self.groundMin, self.groundMax)))
+            if i != 5:
+                self.groundArray.append(GroundBlock(world, self.width*i, self.width, randint(self.groundMin, self.groundMax)))
+            else:
+                self.groundArray.append(LavaBlock(world, 0, self.width, randint(self.groundMin, self.groundMax)))
+
 
     # shifts ground considering the current world.window size
     def updateGround(self, world):

@@ -1,16 +1,19 @@
-import pygame
 from otherFunctions import *
+from GroundBlock import *
+
+import pygame
 
 
 class Player:
 
-    def __init__(self, playerXC, playerYC, playerMS, jumpSpeed):
+    def __init__(self, world, playerXC, playerYC, health):
         self.height = 60
         self.width = 30
         self.XC = playerXC
         self.YC = playerYC
-        self.MS = playerMS
-        self.jumpSpeed = jumpSpeed
+        self.HP = health
+        self.MS = world.windowWidth / 240
+        self.jumpSpeed = world.windowHeight / 45
         self.curSpeedX = 0
         self.curSpeedY = 0
         self.maxJumps = 2
@@ -31,7 +34,7 @@ class Player:
 
         self.height = int(world.windowHeight / world.playerSize)
         self.width = int(world.windowWidth / (world.playerSize * 4))
-        self.jumpSpeed = int(world.windowHeight / 45)
+        self.jumpSpeed = world.windowHeight / 45
         self.MS = world.windowWidth / 240
 
     def display(self, world):
@@ -39,6 +42,9 @@ class Player:
         pygame.draw.rect(world.window, (255, 0, 0), self.playerRect)
 
     def move(self, world, ground):
+
+        # resets all moving stats
+        self.cleanse(world)
 
         # shifting player with world
         self.XC -= int(world.gameMS)
@@ -74,12 +80,9 @@ class Player:
             collidedBlocks = ground.groundCollision(world, self)
             for j in range(len(collidedBlocks)):
                 if ground.overlappedX(self, collidedBlocks[j] - 1) < ground.overlappedY(self, collidedBlocks[j] - 1):
-                    self.XC -= xStep * ground.overlappedX(self, collidedBlocks[j] - 1)
-                    self.curSpeedX = 0
-                    leave = True
+                    leave = ground.groundArray[collidedBlocks[j] - 1].xCollision(world, ground, self, xStep, collidedBlocks[j] - 1)
             if leave:
                 break
-
 
         leave = False
         for i in range(int(toUnsigned(self.curSpeedY))):
@@ -87,12 +90,16 @@ class Player:
             collidedBlocks = ground.groundCollision(world, self)
             for j in range(len(collidedBlocks)):
                 if ground.overlappedX(self, collidedBlocks[j] - 1) > ground.overlappedY(self, collidedBlocks[j] - 1):
-                    self.YC -= yStep * ground.overlappedY(self, collidedBlocks[j] - 1)
-                    self.curSpeedY = 0
-                    self.jumpMark = self.maxJumps
-                    leave = True
+                    leave = ground.groundArray[collidedBlocks[j] - 1].yCollision(world, ground, self, yStep, collidedBlocks[j] - 1)
             if leave:
                 break
+
+
+
+    def cleanse(self, world):
+        self.MS = world.windowWidth / 240
+        self.jumpSpeed = world.windowHeight / 45
+
 
     # execution of player jump
     def jump(self):

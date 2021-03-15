@@ -10,7 +10,7 @@ clock = pygame.time.Clock()
 
 world = World()
 ground = Ground(world, 50, 350)
-player1 = Player(200, 200, 5, 15)
+player1 = Player(world, 200, 200, 100)
 
 while True:
 
@@ -51,6 +51,8 @@ while True:
     for i in range(world.blockAmount+1):
         ground.groundArray[i].drawBlock(world)
     player1.display(world)
+
+    #ground.groundArray[5].xCollision(world, ground, player1, 1, ground.groundArray[5])
 
     # pygame stuff
     pygame.display.flip()
