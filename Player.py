@@ -43,54 +43,42 @@ class Player:
 
     def move(self, world, ground):
 
+
         # resets all moving stats
         self.cleanse(world)
 
         # shifting player with world
         self.XC -= int(world.gameMS)
 
-        xStep = 0
-        yStep = 0
-
         # setting x and y step according to direction of movement
-        if self.curSpeedX > 0:
-            xStep = 1
-        elif self.curSpeedX < 0:
-            xStep = -1
-
-        if self.curSpeedY > 0:
-            yStep = 1
-        elif self.curSpeedY < 0:
-            yStep = -1
-
-
+        xStep = posOrNeg(self.curSpeedX)
+        yStep = posOrNeg(self.curSpeedY)
 
         # managing float integer value of current MS in one pixel steps
         self.restXS = rest(self.restXS)
         self.restXS += rest(self.curSpeedX)
         self.curSpeedX += float(int(self.restXS))
 
-        self.restYS = rest(self.restYS)
-        self.restYS += rest(self.curSpeedY)
-        self.curSpeedY += float(int(self.restYS))
-
         leave = False
         for i in range(int(toUnsigned(self.curSpeedX))):
             self.XC += xStep
             collidedBlocks = ground.groundCollision(world, self)
             for j in range(len(collidedBlocks)):
-                if ground.overlappedX(self, collidedBlocks[j] - 1) < ground.overlappedY(self, collidedBlocks[j] - 1):
-                    leave = ground.groundArray[collidedBlocks[j] - 1].xCollision(world, ground, self, xStep, collidedBlocks[j] - 1)
+                leave = ground.groundArray[collidedBlocks[j]].Collision(world, ground, 'x', collidedBlocks[j], self)
             if leave:
                 break
+
+        # managing float integer value of current MS in one pixel steps
+        self.restYS = rest(self.restYS)
+        self.restYS += rest(self.curSpeedY)
+        self.curSpeedY += float(int(self.restYS))
 
         leave = False
         for i in range(int(toUnsigned(self.curSpeedY))):
             self.YC += yStep
             collidedBlocks = ground.groundCollision(world, self)
             for j in range(len(collidedBlocks)):
-                if ground.overlappedX(self, collidedBlocks[j] - 1) > ground.overlappedY(self, collidedBlocks[j] - 1):
-                    leave = ground.groundArray[collidedBlocks[j] - 1].yCollision(world, ground, self, yStep, collidedBlocks[j] - 1)
+                leave = ground.groundArray[collidedBlocks[j]].Collision(world, ground, 'y', collidedBlocks[j], self)
             if leave:
                 break
 

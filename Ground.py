@@ -22,10 +22,10 @@ class Ground:
     # fills the ground array with blocks
     def initGroundArray(self, world):
         for i in range(self.blockAmount+1):
-            if i != 5:
-                self.groundArray.append(GroundBlock(world, self.width*i, self.width, randint(self.groundMin, self.groundMax)))
+            if i != 2:
+                self.groundArray.append(StdBlock(world, self.width*i, self.width, randint(self.groundMin, self.groundMax)))
             else:
-                self.groundArray.append(LavaBlock(world, 0, self.width, randint(self.groundMin, self.groundMax)))
+                self.groundArray.append(LavaBlock(world, 0, self.width, 666))#randint(self.groundMin, self.groundMax)))
 
 
     # shifts ground considering the current world.window size
@@ -47,8 +47,8 @@ class Ground:
                                                     % (world.windowWidth + self.groundArray[j].width))
 
             # update height of block if it went out of bound and got relocated
-            if self.groundArray[j].XC >= world.windowWidth:  # +1 removed ###############################################
-                self.groundArray[j] = GroundBlock(world, self.groundArray[j].XC,
+            if self.groundArray[j].XC >= world.windowWidth - 1:
+                self.groundArray[j] = StdBlock(world, self.groundArray[j].XC,
                                                   self.groundArray[j].width, randint(self.groundMin, self.groundMax))
 
             # vertical update
@@ -69,7 +69,7 @@ class Ground:
         arr = []
         for i in range(self.blockAmount + 1):
             if Collision(i, world, self, player1):
-                arr.append(i + 1)
+                arr.append(i)
         return arr
 
     # returns the overlapping from player and block in X direction

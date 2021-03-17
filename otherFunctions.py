@@ -25,3 +25,11 @@ def rest(x):
     elif x < 0:
         return -((-x) % 1)
     return 0
+
+
+def posOrNeg(x):
+    if x > 0:
+        return 1
+    if x < 0:
+        return -1
+    return 0
