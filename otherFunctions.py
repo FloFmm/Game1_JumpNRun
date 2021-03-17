@@ -1,3 +1,5 @@
+from random import randint
+
 # checks wether or not player and groundBlock are colliding
 def Collision(i, world, ground, player1):
 
@@ -33,3 +35,10 @@ def posOrNeg(x):
     if x < 0:
         return -1
     return 0
+
+def probability(prob):
+    x = randint(0, 10000)
+    if x <= prob*100:
+        return True
+    else:
+        return False

@@ -52,7 +52,7 @@ while True:
         ground.groundArray[i].drawBlock(world)
     player1.display(world)
 
-    #ground.groundArray[5].xCollision(world, ground, player1, 1, ground.groundArray[5])
+    print(player1.HP)
 
     # pygame stuff
     pygame.display.flip()

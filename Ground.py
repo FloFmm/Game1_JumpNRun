@@ -1,5 +1,5 @@
 from GroundBlock import *
-from otherFunctions import Collision
+from otherFunctions import Collision, probability
 
 import pygame
 from random import randint
@@ -18,14 +18,49 @@ class Ground:
         self.initGroundArray(world)
         self.distanceMoved = 0
         self.restGS = 0
+        self.blockRepeat = 0
 
     # fills the ground array with blocks
     def initGroundArray(self, world):
         for i in range(self.blockAmount+1):
-            if i != 2:
-                self.groundArray.append(StdBlock(world, self.width*i, self.width, randint(self.groundMin, self.groundMax)))
+           # if i != 2:
+             self.groundArray.append(StdBlock(world, self.width*i, self.width, randint(self.groundMin, self.groundMax)))
+           # else:
+                # self.groundArray.append(LavaBlock(world, 0, self.width, 666))#randint(self.groundMin, self.groundMax)))
+
+    # generates new groundBlock
+    def genGroundBlock(self, world, i):
+        # lava
+        lastMinRaw = 50  # 5 % of the window height
+        lavaProb = 60
+        maxLavaB = 3
+        if self.groundArray[i-1].blockType == "lava":
+            if self.blockRepeat < maxLavaB and probability(lavaProb):
+                self.groundArray[i] = LavaBlock(world, self.groundArray[i].XC, self.width, self.groundArray[i-1].rawHeight)
+                self.blockRepeat += 1
+                return
+        elif self.groundArray[i-1].rawHeight > lastMinRaw:
+            if probability(lavaProb):
+                maxNewRaw = int(0.8 * self.groundArray[i - 1].rawHeight)
+                if self.groundMin >= maxNewRaw:
+                    self.groundArray[i] = LavaBlock(world, self.groundArray[i].XC, self.width, self.groundMin)
+                else:
+                    self.groundArray[i] = LavaBlock(world, self.groundArray[i].XC, self.width, randint(self.groundMin, maxNewRaw))
+                self.blockRepeat = 1
+                return
+
+        self.blockRepeat = 0
+        if self.groundArray[i-1].blockType == "lava":
+            minNewRaw = int(1.25 * self.groundArray[i-1].rawHeight)
+            if minNewRaw >= self.groundMax:
+                self.groundArray[i] = StdBlock(world, self.groundArray[i].XC, self.width, minNewRaw)
             else:
-                self.groundArray.append(LavaBlock(world, 0, self.width, 666))#randint(self.groundMin, self.groundMax)))
+                self.groundArray[i] = StdBlock(world, self.groundArray[i].XC, self.width, randint(minNewRaw, self.groundMax))
+        else:
+            self.groundArray[i] = StdBlock(world, self.groundArray[i].XC, self.width, randint(self.groundMin, self.groundMax))
+
+
+
 
 
     # shifts ground considering the current world.window size
@@ -48,8 +83,7 @@ class Ground:
 
             # update height of block if it went out of bound and got relocated
             if self.groundArray[j].XC >= world.windowWidth - 1:
-                self.groundArray[j] = StdBlock(world, self.groundArray[j].XC,
-                                                  self.groundArray[j].width, randint(self.groundMin, self.groundMax))
+                self.genGroundBlock(world, j)
 
             # vertical update
             self.groundArray[j].height = int(self.groundArray[j].rawHeight * world.windowHeight / 1000)

@@ -3,10 +3,10 @@ from otherFunctions import posOrNeg
 
 
 class Block:
-    def __init__(self, world, blockWidth, rawBlockHeight, blockX = 0, blockY = 0):
+    def __init__(self, world, blockWidth=0, rawBlockHeight = 0, blockX = 0, blockY = 0):
         self.width = blockWidth
-        self.rawHeight = rawBlockHeight
-        self.height = int(self.rawHeight * world.windowHeight / 1000)
+        self.rawHeight = rawBlockHeight  # relative Height of the Block
+        self.height = int(world.windowHeight * self.rawHeight / 1000)
         self.XC = blockX
         self.YC = blockY
         self.blockRect = pygame.Rect((self.XC, self.YC, self.width, self.height))
@@ -15,6 +15,26 @@ class Block:
     def drawBlock(self, world):
         self.blockRect = pygame.Rect((self.XC, self.YC, self.width, self.height))
         pygame.draw.rect(world.window, self.color, self.blockRect)
+
+class HealthBar (Block):
+
+    def __init__ (self, world):
+        # super.__init__(world)
+        self.width = 0
+        self.rawHeight = 0  # relative Height of the Block
+        self.height = int(world.windowHeight * self.rawHeight / 1000)
+        self.XC = 0
+        self.YC = 0
+        self.blockRect = pygame.Rect((self.XC, self.YC, self.width, self.height))
+        self.color = (255, 0, 0)
+
+
+    def updateHealthBar(self, world, creature):
+        self.height = int(world.windowHeight / 20)
+        self.XC = int(world.windowHeight / 20)
+        self.YC = int(world.windowHeight / 20)
+        self.width = (1/3) * world.windowWidth * creature.HP / creature.maxHP
+
 
 
 class GroundBlock(Block):
@@ -30,7 +50,8 @@ class StdBlock(GroundBlock):
 
     def __init__(self, world, blockX, blockWidth, rawBlockHeight):
         super().__init__(world, blockX, blockWidth, rawBlockHeight)
-        self.color = (255, 255, 255)
+        self.color = (40, 100, 0)
+        self.blockType = "std"
 
     def Collision(self, world, ground, XorY, collidedBlock, collidedObj):
         if XorY == 'x':
@@ -64,17 +85,17 @@ class LavaBlock (GroundBlock):
         self.dmg = 50/60
         self.slow = 50
         self.color = (200, 0, 0)
+        self.blockType = "lava"
 
     def Collision(self, world, ground, XorY, collidedBlock, collidedObj):
         collidedObj.MS = world.windowWidth / 240 * self.slow / 100
 
-        # print(f"Restspeed: {collidedObj.restYS}")
-        # print(f"speed: {collidedObj.curSpeedY}")
-
         if collidedObj.curSpeedY >= 0:
-            collidedObj.curSpeedY = 0.8  # world.windowHeight / 1000
+            collidedObj.curSpeedY = world.windowHeight / 1000
 
-        collidedObj.HP -= self.dmg
+        if not collidedObj.dmgLava:
+            collidedObj.HP -= self.dmg
+            collidedObj.dmgLava = True
 
         return False
 

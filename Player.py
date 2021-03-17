@@ -11,7 +11,9 @@ class Player:
         self.width = 30
         self.XC = playerXC
         self.YC = playerYC
-        self.HP = health
+        self.maxHP = health
+        self.HP = self.maxHP
+        self.healthBar = HealthBar(world)
         self.MS = world.windowWidth / 240
         self.jumpSpeed = world.windowHeight / 45
         self.curSpeedX = 0
@@ -21,8 +23,13 @@ class Player:
         self.playerRect = pygame.Rect((self.XC, self.YC, self.width, self.height))
         self.restXS = 0
         self.restYS = 0
+        self.dmgLava = False
+        self.color = (255, 255, 255)
 
     def updateScale(self, world):
+
+        # updating health bar
+        self.healthBar.updateHealthBar(world, self)
 
         # update XC if windowWidth has changed (hold relative position on the screen)
         if world.windowWidth != world.windowWidthOld:
@@ -39,7 +46,8 @@ class Player:
 
     def display(self, world):
         self.playerRect = pygame.Rect((self.XC, self.YC, self.width, self.height))
-        pygame.draw.rect(world.window, (255, 0, 0), self.playerRect)
+        pygame.draw.rect(world.window, self.color, self.playerRect)
+        self.healthBar.drawBlock(world)
 
     def move(self, world, ground):
 
@@ -68,6 +76,8 @@ class Player:
             if leave:
                 break
 
+
+
         # managing float integer value of current MS in one pixel steps
         self.restYS = rest(self.restYS)
         self.restYS += rest(self.curSpeedY)
@@ -87,6 +97,7 @@ class Player:
     def cleanse(self, world):
         self.MS = world.windowWidth / 240
         self.jumpSpeed = world.windowHeight / 45
+        self.dmgLava = False
 
 
     # execution of player jump
