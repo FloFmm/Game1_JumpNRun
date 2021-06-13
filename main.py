@@ -48,12 +48,12 @@ while True:
     player1.move(world, ground)
 
     # display content
-    for i in range(world.blockAmount+1):
+    for i in range(world.blockAmount+world.blockBuffer):
         ground.groundArray[i].drawBlock(world)
     player1.display(world)
 
-    print(player1.HP)
 
+    print(world.gravity)
     # pygame stuff
     pygame.display.flip()
     world.window.fill((0, 0, 0))

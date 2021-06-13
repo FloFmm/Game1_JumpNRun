@@ -14,6 +14,7 @@ class World:
         self.playerSize = 10
         self.spaceHold = False
         self.window = pygame.display.set_mode((self.windowWidth, self.windowHeight), pygame.RESIZABLE)
+        self.blockBuffer = 3
 
     def updateWorld(self):
         self.windowWidthOld = self.windowWidth

@@ -22,42 +22,52 @@ class Ground:
 
     # fills the ground array with blocks
     def initGroundArray(self, world):
-        for i in range(self.blockAmount+1):
-           # if i != 2:
+        for i in range(self.blockAmount+world.blockBuffer):
              self.groundArray.append(StdBlock(world, self.width*i, self.width, randint(self.groundMin, self.groundMax)))
-           # else:
-                # self.groundArray.append(LavaBlock(world, 0, self.width, 666))#randint(self.groundMin, self.groundMax)))
 
     # generates new groundBlock
     def genGroundBlock(self, world, i):
         # lava
-        lastMinRaw = 50  # 5 % of the window height
+        maxLavaHeight = 0.8  # 80% of the previous solid Block
         lavaProb = 60
         maxLavaB = 3
-        if self.groundArray[i-1].blockType == "lava":
-            if self.blockRepeat < maxLavaB and probability(lavaProb):
-                self.groundArray[i] = LavaBlock(world, self.groundArray[i].XC, self.width, self.groundArray[i-1].rawHeight)
-                self.blockRepeat += 1
-                return
-        elif self.groundArray[i-1].rawHeight > lastMinRaw:
-            if probability(lavaProb):
-                maxNewRaw = int(0.8 * self.groundArray[i - 1].rawHeight)
-                if self.groundMin >= maxNewRaw:
-                    self.groundArray[i] = LavaBlock(world, self.groundArray[i].XC, self.width, self.groundMin)
-                else:
-                    self.groundArray[i] = LavaBlock(world, self.groundArray[i].XC, self.width, randint(self.groundMin, maxNewRaw))
-                self.blockRepeat = 1
-                return
 
-        self.blockRepeat = 0
+
+
+        # raises groundMin if the last Block is liquid (lava)
         if self.groundArray[i-1].blockType == "lava":
-            minNewRaw = int(1.25 * self.groundArray[i-1].rawHeight)
-            if minNewRaw >= self.groundMax:
-                self.groundArray[i] = StdBlock(world, self.groundArray[i].XC, self.width, minNewRaw)
-            else:
-                self.groundArray[i] = StdBlock(world, self.groundArray[i].XC, self.width, randint(minNewRaw, self.groundMax))
+            groundMin = int(1/maxLavaHeight * self.groundArray[i-1].rawHeight)
         else:
-            self.groundArray[i] = StdBlock(world, self.groundArray[i].XC, self.width, randint(self.groundMin, self.groundMax))
+            groundMin = self.groundMin
+
+
+        # blockRepeat
+        if self.groundArray[i-1].blockType == self.groundArray[i - 2].blockType:
+            self.groundArray[i-1].blockRepeat = self.groundArray[i - 2].blockRepeat + 1
+        else:
+            self.groundArray[i-1].blockRepeat = 1
+
+
+        # gen Lava Block
+        if self.groundArray[i-1].blockType == "lava":
+            if probability(lavaProb) and self.groundArray[i-1].blockRepeat < maxLavaB:
+                self.groundArray[i] = LavaBlock(world, self.groundArray[i].XC, self.width,
+                                                self.groundArray[i - 1].rawHeight)
+                return
+        elif probability(lavaProb):
+            groundMax = int(maxLavaHeight * self.groundArray[i - 1].rawHeight)
+            if groundMin > groundMax:
+                self.groundArray[i] = LavaBlock(world, self.groundArray[i].XC, self.width, groundMax)
+            else:
+                self.groundArray[i] = LavaBlock(world, self.groundArray[i].XC, self.width,
+                                                randint(groundMin,
+                                                        int(maxLavaHeight * self.groundArray[i - 1].rawHeight)))
+            return
+
+
+        # gen Std Block
+        self.groundArray[i] = StdBlock(world, self.groundArray[i].XC, self.width, randint(groundMin, self.groundMax))
+
 
 
 
@@ -70,19 +80,20 @@ class Ground:
         self.restGS += rest(world.gameMS)
         world.gameMS += float(int(self.restGS))
 
-        self.distanceMoved = (self.distanceMoved + int(world.gameMS)) % (world.windowWidth + self.groundArray[0].width)
+        self.distanceMoved = (self.distanceMoved + int(world.gameMS)) % (world.windowWidth + world.blockBuffer * self.groundArray[0].width)
         if world.windowWidth != world.windowWidthOld:
             self.distanceMoved = int(self.distanceMoved * world.windowWidth/world.windowWidthOld)
 
-        for j in range(self.blockAmount + 1):
+        self.width = int(world.windowWidth / self.blockAmount)
+        for j in range(self.blockAmount + world.blockBuffer):
 
             # horizontal update
-            self.groundArray[j].width = int(world.windowWidth / self.blockAmount)
-            self.groundArray[j].XC = world.windowWidth - ((world.windowWidth - j * self.groundArray[j].width + self.distanceMoved)
-                                                    % (world.windowWidth + self.groundArray[j].width))
+            self.groundArray[j].width = self.width
+            self.groundArray[j].XC = world.windowWidth - ((world.windowWidth - j * self.width + self.distanceMoved)
+                                                    % (world.windowWidth + world.blockBuffer * self.width))
 
             # update height of block if it went out of bound and got relocated
-            if self.groundArray[j].XC >= world.windowWidth - 1:
+            if self.groundArray[j].XC < -self.width:
                 self.genGroundBlock(world, j)
 
             # vertical update
@@ -92,16 +103,17 @@ class Ground:
             # update blockRect
             self.groundArray[j].blockRect = pygame.Rect((self.groundArray[j].XC,
                                                          self.groundArray[j].YC,
-                                                         self.groundArray[j].width,
+                                                         self.width,
                                                          self.groundArray[j].height))
 
         # add missing pixels to last block (due to int cast after division)
-        self.groundArray[self.blockAmount].width += world.windowWidth - self.blockAmount * self.groundArray[self.blockAmount].width
+        self.groundArray[self.blockAmount+world.blockBuffer-1].width += world.windowWidth - self.blockAmount * self.groundArray[self.blockAmount].width
+
 
     # returns array of all blocks the player has been collided with
     def groundCollision(self, world, player1):
         arr = []
-        for i in range(self.blockAmount + 1):
+        for i in range(self.blockAmount + world.blockBuffer):
             if Collision(i, world, self, player1):
                 arr.append(i)
         return arr

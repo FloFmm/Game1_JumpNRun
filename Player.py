@@ -72,7 +72,7 @@ class Player:
             self.XC += xStep
             collidedBlocks = ground.groundCollision(world, self)
             for j in range(len(collidedBlocks)):
-                leave = ground.groundArray[collidedBlocks[j]].Collision(world, ground, 'x', collidedBlocks[j], self)
+                leave = leave or ground.groundArray[collidedBlocks[j]].Collision(world, ground, 'x', collidedBlocks[j], self)
             if leave:
                 break
 
@@ -87,10 +87,13 @@ class Player:
         for i in range(int(toUnsigned(self.curSpeedY))):
             self.YC += yStep
             collidedBlocks = ground.groundCollision(world, self)
+            #print(collidedBlocks)
             for j in range(len(collidedBlocks)):
-                leave = ground.groundArray[collidedBlocks[j]].Collision(world, ground, 'y', collidedBlocks[j], self)
+                leave = leave or ground.groundArray[collidedBlocks[j]].Collision(world, ground, 'y', collidedBlocks[j], self)
             if leave:
                 break
+
+
 
 
 

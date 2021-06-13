@@ -16,16 +16,10 @@ class Block:
         self.blockRect = pygame.Rect((self.XC, self.YC, self.width, self.height))
         pygame.draw.rect(world.window, self.color, self.blockRect)
 
-class HealthBar (Block):
+class HealthBar(Block):
 
     def __init__ (self, world):
-        # super.__init__(world)
-        self.width = 0
-        self.rawHeight = 0  # relative Height of the Block
-        self.height = int(world.windowHeight * self.rawHeight / 1000)
-        self.XC = 0
-        self.YC = 0
-        self.blockRect = pygame.Rect((self.XC, self.YC, self.width, self.height))
+        super().__init__(world)
         self.color = (255, 0, 0)
 
 
@@ -43,6 +37,7 @@ class GroundBlock(Block):
         super().__init__(world, blockWidth, rawBlockHeight, blockX)
         self.YC = world.windowHeight - self.height
         self.blockRect = pygame.Rect((self.XC, self.YC, self.width, self.height))
+        self.blockRepeat = 0
 
 
 class StdBlock(GroundBlock):
@@ -55,12 +50,12 @@ class StdBlock(GroundBlock):
 
     def Collision(self, world, ground, XorY, collidedBlock, collidedObj):
         if XorY == 'x':
-            return self.xCollision(world, ground, collidedObj, collidedBlock)
+            return self.xCollision(ground, collidedObj, collidedBlock)
         else:
-            return self.yCollision(world, ground, collidedObj, collidedBlock)
+            return self.yCollision(ground, collidedObj, collidedBlock)
 
 
-    def xCollision(self, world, ground, collidedObj, collidedBlock):
+    def xCollision(self, ground, collidedObj, collidedBlock):
         xStep = posOrNeg(collidedObj.curSpeedX)
         if ground.overlappedX(collidedObj, collidedBlock) < ground.overlappedY(collidedObj, collidedBlock):
             collidedObj.XC -= xStep * ground.overlappedX(collidedObj, collidedBlock)
@@ -68,7 +63,7 @@ class StdBlock(GroundBlock):
             return True
         return False
 
-    def yCollision(self, world, ground, collidedObj, collidedBlock):
+    def yCollision(self, ground, collidedObj, collidedBlock):
         yStep = posOrNeg(collidedObj.curSpeedY)
         if ground.overlappedX(collidedObj, collidedBlock) > ground.overlappedY(collidedObj, collidedBlock):
             collidedObj.YC -= yStep * ground.overlappedY(collidedObj, collidedBlock)
@@ -98,6 +93,36 @@ class LavaBlock (GroundBlock):
             collidedObj.dmgLava = True
 
         return False
+
+class BounceBlock (GroundBlock):
+
+    def __init__(self, world, blockX, blockWidth, rawBlockHeight):
+        super().__init__(world, blockX, blockWidth, rawBlockHeight)
+        self.blockType = "bounce"
+
+    def Collision(self, world, ground, XorY, collidedBlock, collidedObj):
+        if XorY == 'x':
+            return self.xCollision(ground, collidedObj, collidedBlock)
+        else:
+            return self.yCollision(ground, collidedObj, collidedBlock)
+
+    def xCollision(self, ground, collidedObj, collidedBlock):
+        xStep = posOrNeg(collidedObj.curSpeedX)
+        if ground.overlappedX(collidedObj, collidedBlock) < ground.overlappedY(collidedObj, collidedBlock):
+            collidedObj.XC -= xStep * ground.overlappedX(collidedObj, collidedBlock)
+            collidedObj.curSpeedX = 0
+            return True
+        return False
+
+    def yCollision(self, ground, collidedObj, collidedBlock):
+        yStep = posOrNeg(collidedObj.curSpeedY)
+        if ground.overlappedX(collidedObj, collidedBlock) > ground.overlappedY(collidedObj, collidedBlock):
+            collidedObj.YC -= yStep * ground.overlappedY(collidedObj, collidedBlock)
+            collidedObj.curSpeedY = -collidedObj.curSpeedY
+            collidedObj.jumpMark = collidedObj.maxJumps
+            return True
+        return False
+
 
 
 
