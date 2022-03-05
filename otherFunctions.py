@@ -1,4 +1,5 @@
 from random import randint
+import pygame
 
 # checks wether or not player and groundBlock are colliding
 def Collision(i, world, ground, player1):
@@ -42,3 +43,8 @@ def probability(prob):
         return True
     else:
         return False
+
+def gameRender(world, clock):
+    pygame.display.flip()
+    world.window.fill((0, 0, 0))
+    clock.tick(60)

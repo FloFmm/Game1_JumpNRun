@@ -1,6 +1,8 @@
 from World import *
 from Player import *
 from Ground import *
+from InGame import *
+from MainMenu import *
 
 import pygame
 
@@ -11,56 +13,25 @@ clock = pygame.time.Clock()
 world = World()
 ground = Ground(world, 50, 350)
 player1 = Player(world, 200, 200, 100)
+# button1 = Button(200, 200, 100, 50, "button1")
+mainMenu = MainMenu(world, clock)
+inGame = InGame(world, clock, player1)
+
 
 while True:
 
-    # exit button
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-
-    # saving pressed keys
-    keysPressed = pygame.key.get_pressed()
-
-    # key action
-    if keysPressed[pygame.K_RIGHT]:
-        player1.curSpeedX = player1.MS
-    elif keysPressed[pygame.K_LEFT]:
-        player1.curSpeedX = -player1.MS
+    if world.menuLocation == "start-menu":
+        mainMenu.run(world, clock)
     else:
-        player1.curSpeedX = 0
-    if keysPressed[pygame.K_SPACE]:
-        if not world.spaceHold:   # allowing jump only when key has previously been released
-            player1.jump()  # -> only one jump mark is used when pressing the key once (and holding it)
-            world.spaceHold = True
-    else:
-        world.spaceHold = False
-
-    # updates all properties of the whole world
-    world.updateWorld()
-
-    # update all sizes
-    player1.updateScale(world)
-    ground.updateGround(world)
-
-    # update all positions
-    player1.gravity(world)
-    player1.move(world, ground)
-
-    # display content
-    for i in range(world.blockAmount+world.blockBuffer):
-        ground.groundArray[i].drawBlock(world)
-    player1.display(world)
+        exitReason = inGame.run(world, clock, player1, ground)
+        if exitReason == "death":
+            # reset
+            ground = Ground(world, 50, 350)
+            player1 = Player(world, 200, 200, 100)
+            inGame = InGame(world, clock, player1)
 
 
-    #print(world.gravity)
-    # pygame stuff
-    #print(player1.curSpeedY)
-    #print(world.gravity)
 
-    pygame.display.flip()
-    world.window.fill((0, 0, 0))
-    clock.tick(60)
 
 
 

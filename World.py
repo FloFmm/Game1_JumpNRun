@@ -15,6 +15,7 @@ class World:
         self.spaceHold = False
         self.window = pygame.display.set_mode((self.windowWidth, self.windowHeight), pygame.RESIZABLE)
         self.blockBuffer = 3
+        self.menuLocation = "start-menu"
 
     def updateWorld(self):
         self.windowWidthOld = self.windowWidth
