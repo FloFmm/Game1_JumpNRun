@@ -53,9 +53,14 @@ while True:
     player1.display(world)
 
 
-    print(world.gravity)
+    #print(world.gravity)
     # pygame stuff
+    #print(player1.curSpeedY)
+    #print(world.gravity)
+
     pygame.display.flip()
     world.window.fill((0, 0, 0))
     clock.tick(60)
+
+
 

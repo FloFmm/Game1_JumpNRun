@@ -32,7 +32,8 @@ class Ground:
         lavaProb = 60
         maxLavaB = 3
 
-
+        # bounce
+        bounceProb = 50
 
         # raises groundMin if the last Block is liquid (lava)
         if self.groundArray[i-1].blockType == "lava":
@@ -64,7 +65,10 @@ class Ground:
                                                         int(maxLavaHeight * self.groundArray[i - 1].rawHeight)))
             return
 
-
+        # gen bounce block
+        if probability(bounceProb):
+            self.groundArray[i] = BounceBlock(world, self.groundArray[i].XC, self.width, randint(groundMin, self.groundMax))
+            return
         # gen Std Block
         self.groundArray[i] = StdBlock(world, self.groundArray[i].XC, self.width, randint(groundMin, self.groundMax))
 
@@ -80,9 +84,11 @@ class Ground:
         self.restGS += rest(world.gameMS)
         world.gameMS += float(int(self.restGS))
 
-        self.distanceMoved = (self.distanceMoved + int(world.gameMS)) % (world.windowWidth + world.blockBuffer * self.groundArray[0].width)
+        self.distanceMoved = (self.distanceMoved + int(world.gameMS)) % (world.windowWidthOld + world.blockBuffer * (world.windowWidthOld/self.blockAmount))
         if world.windowWidth != world.windowWidthOld:
             self.distanceMoved = int(self.distanceMoved * world.windowWidth/world.windowWidthOld)
+            print("hellO")
+            print(world.windowWidth/world.windowWidthOld)
 
         self.width = int(world.windowWidth / self.blockAmount)
         for j in range(self.blockAmount + world.blockBuffer):

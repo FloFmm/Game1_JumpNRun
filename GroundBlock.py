@@ -99,6 +99,7 @@ class BounceBlock (GroundBlock):
     def __init__(self, world, blockX, blockWidth, rawBlockHeight):
         super().__init__(world, blockX, blockWidth, rawBlockHeight)
         self.blockType = "bounce"
+        self.color = (20, 20, 60)
 
     def Collision(self, world, ground, XorY, collidedBlock, collidedObj):
         if XorY == 'x':
@@ -118,7 +119,9 @@ class BounceBlock (GroundBlock):
         yStep = posOrNeg(collidedObj.curSpeedY)
         if ground.overlappedX(collidedObj, collidedBlock) > ground.overlappedY(collidedObj, collidedBlock):
             collidedObj.YC -= yStep * ground.overlappedY(collidedObj, collidedBlock)
+            #print(collidedObj.curSpeedY)
             collidedObj.curSpeedY = -collidedObj.curSpeedY
+            #print(collidedObj.curSpeedY)
             collidedObj.jumpMark = collidedObj.maxJumps
             return True
         return False

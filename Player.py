@@ -15,7 +15,7 @@ class Player:
         self.HP = self.maxHP
         self.healthBar = HealthBar(world)
         self.MS = world.windowWidth / 240
-        self.jumpSpeed = world.windowHeight / 45
+        self.jumpSpeed = world.windowHeight / 45 * 1.5
         self.curSpeedX = 0
         self.curSpeedY = 0
         self.maxJumps = 2
@@ -41,7 +41,7 @@ class Player:
 
         self.height = int(world.windowHeight / world.playerSize)
         self.width = int(world.windowWidth / (world.playerSize * 4))
-        self.jumpSpeed = world.windowHeight / 45
+        self.jumpSpeed = world.windowHeight / 45 * 1.5
         self.MS = world.windowWidth / 240
 
     def display(self, world):
@@ -81,7 +81,13 @@ class Player:
         # managing float integer value of current MS in one pixel steps
         self.restYS = rest(self.restYS)
         self.restYS += rest(self.curSpeedY)
-        self.curSpeedY += float(int(self.restYS))
+
+        # warum hier eine if funktion steht wissen wir selber nicht
+        # eigentlich sollte der rest einer negativen Zahl auch negativ sein
+        if self.curSpeedY>0:
+            self.curSpeedY += float(int(self.restYS))
+        else:
+            self.curSpeedY -= float(int(self.restYS))
 
         leave = False
         for i in range(int(toUnsigned(self.curSpeedY))):
@@ -99,7 +105,7 @@ class Player:
 
     def cleanse(self, world):
         self.MS = world.windowWidth / 240
-        self.jumpSpeed = world.windowHeight / 45
+        self.jumpSpeed = world.windowHeight / 45 * 1.5
         self.dmgLava = False
 
 
@@ -124,4 +130,7 @@ class Player:
 
     # executes gravity on the player
     def gravity(self, world):
-        self.curSpeedY += world.gravity
+        #rint(self.curSpeedY)
+        self.curSpeedY += 1#world.gravity
+        # print(self.curSpeedY)
+        #print(int(-4.6))
