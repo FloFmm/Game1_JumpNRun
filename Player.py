@@ -26,6 +26,9 @@ class Player:
         self.dmgLava = False
         self.color = (255, 255, 255)
 
+        self.player_image = pygame.image.load('ghost.png')
+        self.player_image = pygame.transform.scale(self.player_image, (self.width,  self.height))
+
     def updateScale(self, world):
 
         # updating health bar
@@ -46,7 +49,11 @@ class Player:
 
     def display(self, world):
         self.playerRect = pygame.Rect((self.XC, self.YC, self.width, self.height))
-        pygame.draw.rect(world.window, self.color, self.playerRect)
+        #pygame.draw.rect(world.window, self.color, self.playerRect)
+
+        self.player_image = pygame.transform.scale(self.player_image, (self.width, self.height))
+        world.window.blit(self.player_image, (self.XC, self.YC))
+
         self.healthBar.drawBlock(world)
 
     def move(self, world, ground):

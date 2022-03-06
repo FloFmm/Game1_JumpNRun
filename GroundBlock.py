@@ -11,15 +11,21 @@ class Block:
         self.YC = blockY
         self.blockRect = pygame.Rect((self.XC, self.YC, self.width, self.height))
 
+        self.block_image = pygame.image.load('test.jpg')
+        self.block_image = pygame.transform.scale(self.block_image, (self.width,  self.height))
+
     # updates the rect and then draws it on the world.window
     def drawBlock(self, world):
         self.blockRect = pygame.Rect((self.XC, self.YC, self.width, self.height))
-        pygame.draw.rect(world.window, self.color, self.blockRect)
+        #pygame.draw.rect(world.window, self.color, self.blockRect)
+        self.block_image = pygame.transform.scale(self.block_image, (int(self.width), self.height))
+        world.window.blit(self.block_image, (self.XC, self.YC))
 
 class HealthBar(Block):
 
     def __init__ (self, world):
-        super().__init__(world)
+        super().__init__(world, int((1/3) * world.windowWidth), int(world.windowHeight / 20), int(world.windowHeight / 20),
+                         int(world.windowHeight / 20))
         self.color = (255, 0, 0)
 
 
@@ -31,12 +37,13 @@ class HealthBar(Block):
 
 
 
+
 class GroundBlock(Block):
 
     def __init__(self, world, blockX, blockWidth, rawBlockHeight):
         super().__init__(world, blockWidth, rawBlockHeight, blockX)
         self.YC = world.windowHeight - self.height
-        self.blockRect = pygame.Rect((self.XC, self.YC, self.width, self.height))
+        #self.blockRect = pygame.Rect((self.XC, self.YC, self.width, self.height))
         self.blockRepeat = 0
 
 
