@@ -26,7 +26,7 @@ class Player:
         self.dmgLava = False
         self.color = (255, 255, 255)
 
-        self.player_image = pygame.image.load('ghost.png')
+        self.player_image = pygame.image.load('images/characters/ghost.png')
         self.player_image = pygame.transform.scale(self.player_image, (self.width,  self.height))
 
     def updateScale(self, world):
@@ -138,6 +138,6 @@ class Player:
     # executes gravity on the player
     def gravity(self, world):
         #rint(self.curSpeedY)
-        self.curSpeedY += 1#world.gravity
+        self.curSpeedY += world.gravity
         # print(self.curSpeedY)
         #print(int(-4.6))

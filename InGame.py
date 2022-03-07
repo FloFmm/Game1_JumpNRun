@@ -1,5 +1,6 @@
 import pygame
 from otherFunctions import *
+from Background import*
 
 class InGame:
 
@@ -8,6 +9,7 @@ class InGame:
         self.world = world
         self.clock = clock
         self.player = player
+        self.background = Background("images/backgrounds/background.png")
 
     def draw(self, world):
         pass
@@ -56,6 +58,7 @@ class InGame:
             self.update(world, player, ground)
 
             # display content
+            self.background.draw(world)
             for i in range(world.blockAmount + world.blockBuffer):
                 ground.groundArray[i].drawBlock(world)
             player.display(world)

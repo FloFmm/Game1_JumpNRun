@@ -3,6 +3,7 @@ from Player import *
 from Ground import *
 from InGame import *
 from MainMenu import *
+from Background import*
 
 import pygame
 

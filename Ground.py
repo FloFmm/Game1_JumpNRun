@@ -23,7 +23,7 @@ class Ground:
     # fills the ground array with blocks
     def initGroundArray(self, world):
         for i in range(self.blockAmount+world.blockBuffer):
-             self.groundArray.append(StdBlock(world, self.width*i, self.width, randint(self.groundMin, self.groundMax)))
+             self.groundArray.append(StdBlock(world, self.width*i, randint(self.groundMin, self.groundMax)))
 
     # generates new groundBlock
     def genGroundBlock(self, world, i):
@@ -52,25 +52,23 @@ class Ground:
         # gen Lava Block
         if self.groundArray[i-1].blockType == "lava":
             if probability(lavaProb) and self.groundArray[i-1].blockRepeat < maxLavaB:
-                self.groundArray[i] = LavaBlock(world, self.groundArray[i].XC, self.width,
-                                                self.groundArray[i - 1].rawHeight)
+                self.groundArray[i] = LavaBlock(world, self.groundArray[i].XC, self.groundArray[i - 1].rawHeight)
                 return
         elif probability(lavaProb):
             groundMax = int(maxLavaHeight * self.groundArray[i - 1].rawHeight)
             if groundMin > groundMax:
-                self.groundArray[i] = LavaBlock(world, self.groundArray[i].XC, self.width, groundMax)
+                self.groundArray[i] = LavaBlock(world, self.groundArray[i].XC, groundMax)
             else:
-                self.groundArray[i] = LavaBlock(world, self.groundArray[i].XC, self.width,
-                                                randint(groundMin,
+                self.groundArray[i] = LavaBlock(world, self.groundArray[i].XC, randint(groundMin,
                                                         int(maxLavaHeight * self.groundArray[i - 1].rawHeight)))
             return
 
         # gen bounce block
         if probability(bounceProb):
-            self.groundArray[i] = BounceBlock(world, self.groundArray[i].XC, self.width, randint(groundMin, self.groundMax))
+            self.groundArray[i] = BounceBlock(world, self.groundArray[i].XC, randint(groundMin, self.groundMax))
             return
         # gen Std Block
-        self.groundArray[i] = StdBlock(world, self.groundArray[i].XC, self.width, randint(groundMin, self.groundMax))
+        self.groundArray[i] = StdBlock(world, self.groundArray[i].XC, randint(groundMin, self.groundMax))
 
 
 
@@ -79,6 +77,8 @@ class Ground:
 
     # shifts ground considering the current world.window size
     def updateGround(self, world):
+        #print(len(self.groundArray))
+
         # managing float integer value of current MS in one pixel steps
         self.restGS = rest(self.restGS)
         self.restGS += rest(world.gameMS)
@@ -87,14 +87,20 @@ class Ground:
         self.distanceMoved = (self.distanceMoved + int(world.gameMS)) % (world.windowWidthOld + world.blockBuffer * (world.windowWidthOld/self.blockAmount))
         if world.windowWidth != world.windowWidthOld:
             self.distanceMoved = int(self.distanceMoved * world.windowWidth/world.windowWidthOld)
-            print("hellO")
             print(world.windowWidth/world.windowWidthOld)
 
-        self.width = int(world.windowWidth / self.blockAmount)
+        self.width = int(world.windowWidth / self.blockAmount) + 1
         for j in range(self.blockAmount + world.blockBuffer):
 
             # horizontal update
-            self.groundArray[j].width = self.width
+            #print("new")
+            #print(self.groundArray[j].width)
+            #print("old:")
+            #print(self.groundArray[j].old_width)
+            #self.groundArray[j].old_width = self.groundArray[j].width
+            #GroundBlock.old_width = GroundBlock.width
+            GroundBlock.width = self.width
+            #self.groundArray[j].width = self.width
             self.groundArray[j].XC = world.windowWidth - ((world.windowWidth - j * self.width + self.distanceMoved)
                                                     % (world.windowWidth + world.blockBuffer * self.width))
 
@@ -103,6 +109,7 @@ class Ground:
                 self.genGroundBlock(world, j)
 
             # vertical update
+            #self.groundArray[j].old_height = self.groundArray[j].height
             self.groundArray[j].height = int(self.groundArray[j].rawHeight * world.windowHeight / 1000)
             self.groundArray[j].YC = world.windowHeight - self.groundArray[j].height  # +1 removed! #####################
 

@@ -1,23 +1,30 @@
 import pygame
+import copy
 from otherFunctions import posOrNeg
 
 
 class Block:
-    def __init__(self, world, blockWidth=0, rawBlockHeight = 0, blockX = 0, blockY = 0):
+    def __init__(self, world, blockWidth=0, rawBlockHeight = 0, blockX = 0, blockY = 0, image_source = 'images/blocks/grass_block.png'):
         self.width = blockWidth
         self.rawHeight = rawBlockHeight  # relative Height of the Block
         self.height = int(world.windowHeight * self.rawHeight / 1000)
+        self.old_width = 0
+        self.old_height = 0
         self.XC = blockX
         self.YC = blockY
         self.blockRect = pygame.Rect((self.XC, self.YC, self.width, self.height))
+        self.color = (0,0,0)
 
-        self.block_image = pygame.image.load('test.jpg')
-        self.block_image = pygame.transform.scale(self.block_image, (self.width,  self.height))
+        self.block_image = pygame.image.load(image_source)
+        self.block_image.convert()
+        self.block_image_to_draw = copy.copy(self.block_image).convert()
+        self.block_image_to_draw = pygame.transform.scale(self.block_image_to_draw, (int(self.width), (int(self.width*16))))
+        #self.block_image = pygame.transform.scale(self.block_image, (self.width,  self.height))
 
     # updates the rect and then draws it on the world.window
     def drawBlock(self, world):
         self.blockRect = pygame.Rect((self.XC, self.YC, self.width, self.height))
-        #pygame.draw.rect(world.window, self.color, self.blockRect)
+        pygame.draw.rect(world.window, self.color, self.blockRect)
         self.block_image = pygame.transform.scale(self.block_image, (int(self.width), self.height))
         world.window.blit(self.block_image, (self.XC, self.YC))
 
@@ -39,19 +46,43 @@ class HealthBar(Block):
 
 
 class GroundBlock(Block):
+    width = 0
 
-    def __init__(self, world, blockX, blockWidth, rawBlockHeight):
-        super().__init__(world, blockWidth, rawBlockHeight, blockX)
+    def __init__(self, world, blockX, rawBlockHeight, image_source = 'images/blocks/grass_block.png'):
+        super().__init__(world, 0, rawBlockHeight, blockX, 0, image_source)
         self.YC = world.windowHeight - self.height
         #self.blockRect = pygame.Rect((self.XC, self.YC, self.width, self.height))
         self.blockRepeat = 0
+        self.blockType = "ground_block"
 
+    def drawBlock(self, world):
+        self.blockRect = pygame.Rect((self.XC, self.YC, GroundBlock.width, self.height))
+        #pygame.draw.rect(world.window, self.color, self.blockRect)
+
+        #print("height")
+        #print(self.width)
+        #print("oldheight")
+        #print(self.old_width)
+        #print(self.blockType)
+        if not GroundBlock.width == self.width:
+            self.block_image_to_draw = copy.copy(self.block_image)
+            self.block_image_to_draw = pygame.transform.scale(self.block_image_to_draw, (int(GroundBlock.width), (int(GroundBlock.width * 16))))
+            self.block_image_to_draw.convert()
+            self.width = GroundBlock.width
+
+        #if not self.height == self.old_height or not GroundBlock.width == GroundBlock.old_width:
+        #    self.block_image_to_draw = copy.copy(self.block_image)
+        #    self.block_image_to_draw = pygame.transform.scale(self.block_image_to_draw, (int(GroundBlock.width), (int(GroundBlock.width*16))))
+        #    self.block_image_to_draw.convert()
+        #    print("not equal")
+        cropped_region = (0, 0, GroundBlock.width, self.height)
+        world.window.blit(self.block_image_to_draw, (self.XC, self.YC),cropped_region)
 
 class StdBlock(GroundBlock):
 
 
-    def __init__(self, world, blockX, blockWidth, rawBlockHeight):
-        super().__init__(world, blockX, blockWidth, rawBlockHeight)
+    def __init__(self, world, blockX, rawBlockHeight):
+        super().__init__(world, blockX, rawBlockHeight, 'images/blocks/grass_block.png')
         self.color = (40, 100, 0)
         self.blockType = "std"
 
@@ -82,8 +113,8 @@ class StdBlock(GroundBlock):
 
 class LavaBlock (GroundBlock):
 
-    def __init__(self, world, blockX, blockWidth, rawBlockHeight):
-        super().__init__(world, blockX, blockWidth, rawBlockHeight)
+    def __init__(self, world, blockX, rawBlockHeight):
+        super().__init__(world, blockX, rawBlockHeight, 'images/blocks/lava_block.png')
         self.dmg = 50/60
         self.slow = 50
         self.color = (200, 0, 0)
@@ -103,8 +134,8 @@ class LavaBlock (GroundBlock):
 
 class BounceBlock (GroundBlock):
 
-    def __init__(self, world, blockX, blockWidth, rawBlockHeight):
-        super().__init__(world, blockX, blockWidth, rawBlockHeight)
+    def __init__(self, world, blockX, rawBlockHeight):
+        super().__init__(world, blockX, rawBlockHeight,'images/blocks/jump_block.png')
         self.blockType = "bounce"
         self.color = (20, 20, 60)
 
