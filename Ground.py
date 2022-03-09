@@ -89,7 +89,7 @@ class Ground:
             self.distanceMoved = int(self.distanceMoved * world.windowWidth/world.windowWidthOld)
             print(world.windowWidth/world.windowWidthOld)
 
-        self.width = int(world.windowWidth / self.blockAmount) + 1
+        self.width = int(world.windowWidth / self.blockAmount) #+ 1 wieder entnommen wegen überlappung
         for j in range(self.blockAmount + world.blockBuffer):
 
             # horizontal update

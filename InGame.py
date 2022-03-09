@@ -1,6 +1,7 @@
 import pygame
 from otherFunctions import *
 from Background import*
+from InGameInterface import*
 
 class InGame:
 
@@ -10,6 +11,7 @@ class InGame:
         self.clock = clock
         self.player = player
         self.background = Background("images/backgrounds/background.png")
+        self.interface = InGameInterface(player, world.windowWidth, world.windowHeight)
 
     def draw(self, world):
         pass
@@ -62,6 +64,7 @@ class InGame:
             for i in range(world.blockAmount + world.blockBuffer):
                 ground.groundArray[i].drawBlock(world)
             player.display(world)
+            self.interface.draw(world)
 
             if self.player.HP <= 0 or self.player.YC > world.windowHeight + 100:
                 world.menuLocation = "start-menu"

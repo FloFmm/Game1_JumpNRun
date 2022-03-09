@@ -18,7 +18,6 @@ player1 = Player(world, 200, 200, 100)
 mainMenu = MainMenu(world, clock)
 inGame = InGame(world, clock, player1)
 
-
 while True:
 
     if world.menuLocation == "start-menu":

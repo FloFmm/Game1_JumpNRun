@@ -13,7 +13,7 @@ class Player:
         self.YC = playerYC
         self.maxHP = health
         self.HP = self.maxHP
-        self.healthBar = HealthBar(world)
+        #self.healthBar = HealthBar(world)
         self.MS = world.windowWidth / 240
         self.jumpSpeed = world.windowHeight / 45 * 1.5
         self.curSpeedX = 0
@@ -32,7 +32,7 @@ class Player:
     def updateScale(self, world):
 
         # updating health bar
-        self.healthBar.updateHealthBar(world, self)
+        #self.healthBar.updateHealthBar(world, self)
 
         # update XC if windowWidth has changed (hold relative position on the screen)
         if world.windowWidth != world.windowWidthOld:
@@ -54,7 +54,7 @@ class Player:
         self.player_image = pygame.transform.scale(self.player_image, (self.width, self.height))
         world.window.blit(self.player_image, (self.XC, self.YC))
 
-        self.healthBar.drawBlock(world)
+        #self.healthBar.drawBlock(world)
 
     def move(self, world, ground):
 

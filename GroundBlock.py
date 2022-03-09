@@ -28,19 +28,19 @@ class Block:
         self.block_image = pygame.transform.scale(self.block_image, (int(self.width), self.height))
         world.window.blit(self.block_image, (self.XC, self.YC))
 
-class HealthBar(Block):
-
-    def __init__ (self, world):
-        super().__init__(world, int((1/3) * world.windowWidth), int(world.windowHeight / 20), int(world.windowHeight / 20),
-                         int(world.windowHeight / 20))
-        self.color = (255, 0, 0)
-
-
-    def updateHealthBar(self, world, creature):
-        self.height = int(world.windowHeight / 20)
-        self.XC = int(world.windowHeight / 20)
-        self.YC = int(world.windowHeight / 20)
-        self.width = (1/3) * world.windowWidth * creature.HP / creature.maxHP
+#class HealthBar(Block):
+#
+#    def __init__ (self, world):
+#        super().__init__(world, int((1/3) * world.windowWidth), int(world.windowHeight / 20), int(world.windowHeight / 20),
+#                         int(world.windowHeight / 20))
+#        self.color = (255, 0, 0)#
+#
+#
+#    def updateHealthBar(self, world, creature):
+#        self.height = int(world.windowHeight / 20)
+#        self.XC = int(world.windowHeight / 20)
+#        self.YC = int(world.windowHeight / 20)
+#        self.width = (1/3) * world.windowWidth * creature.HP / creature.maxHP
 
 
 
