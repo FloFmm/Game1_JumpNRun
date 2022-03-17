@@ -26,8 +26,11 @@ class Player:
         self.dmgLava = False
         self.color = (255, 255, 255)
 
-        self.player_image = pygame.image.load('images/characters/ghost.png')
+        self.player_image = pygame.image.load('images/characters/flo_hat_den_mund_verkackt.png')
         self.player_image = pygame.transform.scale(self.player_image, (self.width,  self.height))
+
+        self.player_image2 = pygame.image.load('images/characters/flo_hat_den_mund_verkackt2.png')
+        self.player_image2 = pygame.transform.scale(self.player_image2, (self.width, self.height))
 
     def updateScale(self, world):
 
@@ -52,7 +55,12 @@ class Player:
         #pygame.draw.rect(world.window, self.color, self.playerRect)
 
         self.player_image = pygame.transform.scale(self.player_image, (self.width, self.height))
-        world.window.blit(self.player_image, (self.XC, self.YC))
+        self.player_image2 = pygame.transform.scale(self.player_image2, (self.width, self.height))
+
+        if not self.dmgLava:
+            world.window.blit(self.player_image, (self.XC, self.YC))
+        else:
+            world.window.blit(self.player_image2, (self.XC, self.YC))
 
         #self.healthBar.drawBlock(world)
 
@@ -141,3 +149,4 @@ class Player:
         self.curSpeedY += world.gravity
         # print(self.curSpeedY)
         #print(int(-4.6))
+
